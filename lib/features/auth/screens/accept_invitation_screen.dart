@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_error.dart';
 import '../../../core/state/auth_state.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/error_view.dart';
 import '../../../core/widgets/loading_indicator.dart';
 
@@ -41,7 +39,7 @@ class _AcceptInvitationScreenState extends ConsumerState<AcceptInvitationScreen>
       return;
     }
     try {
-      await ref.read(authNotifierProvider.notifier).acceptInvitation(token);
+      await ref.read(authProvider.notifier).acceptInvitation(token: token.toString(), password: 'placeholder');
       if (!mounted) return;
       context.go('/home');
     } on ApiError catch (e) {

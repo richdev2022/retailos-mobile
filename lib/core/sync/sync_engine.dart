@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:drift/drift.dart' show Value, Variable, InsertMode;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/api_client.dart';
 import '../network/api_endpoints.dart';
@@ -276,7 +276,7 @@ class SyncEngine {
 
   LocalProductsCompanion _productFromServer(Map<String, dynamic> p) {
     return LocalProductsCompanion(
-      id: const Value(absent()),
+      id: const Value.absent(),
       serverId: Value(p['id']?.toString()),
       syncId: Value(p['sync_id']?.toString() ?? ''),
       businessId: Value(p['business_id']?.toString() ?? ''),

@@ -41,9 +41,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: AppTextField(
+                label: 'Search',
                 controller: _search,
-                hint: 'Search products, SKU, barcode',
-                prefixIcon: Icons.search_rounded,
+                hintText: 'Search products, SKU, barcode',
+                prefixIcon: const Icon(Icons.search_rounded),
                 textInputAction: TextInputAction.search,
               ),
             ),
@@ -115,7 +116,7 @@ class _ProductTile extends StatelessWidget {
           color: AppTheme.primaryLight,
           borderRadius: BorderRadius.circular(AppTheme.radiusSm),
         ),
-        child: const Icon(Icons.inventory_2_outlined,
+        child: Icon(Icons.inventory_2_outlined,
             size: 20, color: AppTheme.primary),
       ),
       title: Text(name, style: const TextStyle(fontWeight: FontWeight.w600)),

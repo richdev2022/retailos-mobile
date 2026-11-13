@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// On Android, uses EncryptedSharedPreferences (Jetpack Security).
 /// On iOS, uses Keychain.
 class SecureStorage {
-  SecureStorage._();
+  SecureStorage();
 
   static const FlutterSecureStorage _storage = FlutterSecureStorage(
     aOptions: AndroidOptions(encryptedSharedPreferences: true),
@@ -76,6 +76,30 @@ class SecureStorage {
 
   static Future<String?> getLastSyncCursor() => _storage.read(key: _kLastSyncCursor);
   static Future<void> setLastSyncCursor(String cursor) => _storage.write(key: _kLastSyncCursor, value: cursor);
+
+  // ============ Instance-style helpers (used by providers & sync engine) ============
+
+  Future<String?> getAccessTokenInst() => _storage.read(key: _kAccessToken);
+  Future<String?> getRefreshTokenInst() => _storage.read(key: _kRefreshToken);
+
+  Future<void> setTokens({String? accessToken, String? refreshToken}) async {
+    if (accessToken != null) {
+      await _storage.write(key: _kAccessToken, value: accessToken);
+    }
+    if (refreshToken != null) {
+      await _storage.write(key: _kRefreshToken, value: refreshToken);
+    }
+  }
+
+  Future<String?> readKey(String key) => _storage.read(key: key);
+
+  Future<void> writeKey(String key, String? value) async {
+    if (value == null) {
+      await _storage.delete(key: key);
+    } else {
+      await _storage.write(key: key, value: value);
+    }
+  }
 
   /// Clear all auth-related keys (on logout).
   static Future<void> clearAuth() async {

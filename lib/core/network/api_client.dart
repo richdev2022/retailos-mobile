@@ -37,7 +37,6 @@ class ApiClient {
           responseBody: true,
           error: true,
           logPrint: (o) => debugPrint('[http] $o'),
-          maxWidth: 120,
         ),
       );
     }
@@ -110,7 +109,7 @@ class ApiClient {
   }
 
   /// Unwraps a paginated list response.
-  PaginatedResponse<T> unwrapList<T>(Response<dynamic> response, T Function(List<dynamic> items) mapper) {
+  PaginatedResponse<T> unwrapList<T>(Response<dynamic> response, List<T> Function(List<dynamic> items) mapper) {
     if (response.statusCode == null || response.statusCode! >= 400) {
       throw ApiError.fromResponse(response);
     }
@@ -130,6 +129,16 @@ class ApiClient {
       page: (data['page'] as num?)?.toInt() ?? 1,
       limit: (data['limit'] as num?)?.toInt() ?? 20,
       pages: (data['pages'] as num?)?.toInt() ?? 1,
+    );
+  }
+
+  /// List businesses for the current user. Returns a paginated response of raw
+  /// maps — caller converts to BusinessSummary via fromJson.
+  Future<PaginatedResponse<Map<String, dynamic>>> listBusinesses(Map<String, dynamic> query) async {
+    final response = await get('businesses', queryParameters: query);
+    return unwrapList<Map<String, dynamic>>(
+      response,
+      (items) => items.cast<Map<String, dynamic>>(),
     );
   }
 }
@@ -228,7 +237,6 @@ class _AuthInterceptor extends Interceptor {
   Future<String?> _refreshTokenSingleFlight() async {
     if (_refreshing) {
       // Wait until the inflight refresh completes
-      final completer = <Future<void> Function()>[];
       await Future<void>.delayed(const Duration(milliseconds: 200));
       return SecureStorage.getAccessToken();
     }

@@ -3,12 +3,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../sync/sync_engine.dart';
 import 'auth_state.dart';
 import 'business_state.dart';
 import 'providers.dart';
 
-part 'bootstrap.g.dart';
 
 /// Singleton handle to the local notifications plugin.
 final flutterLocalNotificationsProvider =
@@ -26,7 +24,7 @@ final flutterLocalNotificationsProvider =
 /// Resolves to `true` once ready. Screens that depend on a restored session
 /// watch this provider so they only render after bootstrap completes.
 @riverpod
-Future<bool> bootstrap(BootstrapRef ref) async {
+Future<bool> bootstrap(Ref ref) async {
   // 1. Touch the database (opens the file lazily) so it's warm before use.
   ref.read(localDatabaseProvider);
 
@@ -37,12 +35,12 @@ Future<bool> bootstrap(BootstrapRef ref) async {
   ref.read(syncEngineProvider);
 
   // 4. Restore the user's session (tokens + /me).
-  await ref.read(authNotifierProvider.notifier).restoreSession();
+  await ref.read(authProvider.notifier).bootstrap();
 
   // 5. Restore active business / branch context (also primes the
   //    X-Business-Id header cache used by the ApiClient).
-  if (ref.read(authNotifierProvider).isAuthenticated) {
-    await ref.read(businessNotifierProvider.notifier).restore();
+  if (ref.read(authProvider).isAuthenticated) {
+    await ref.read(businessProvider.notifier).bootstrap();
     // Kick off a background sync once the user is known to be online.
     ref.read(syncEngineProvider).runFullSync().catchError((e) {
       if (kDebugMode) print('[bootstrap] initial sync failed: $e');
@@ -52,7 +50,7 @@ Future<bool> bootstrap(BootstrapRef ref) async {
   return true;
 }
 
-Future<void> _initNotifications(BootstrapRef ref) async {
+Future<void> _initNotifications(Ref ref) async {
   final plugin = ref.read(flutterLocalNotificationsProvider);
   const android = AndroidInitializationSettings('@mipmap/ic_launcher');
   const ios = DarwinInitializationSettings(

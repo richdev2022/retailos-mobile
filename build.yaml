@@ -1,0 +1,20 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        enabled: true
+        generate_for:
+          include:
+            - lib/core/storage/local_database.dart
+      json_serializable:
+        enabled: true
+        generate_for:
+          include:
+            - lib/core/models/*.dart
+      freezed:
+        enabled: true
+        generate_for:
+          include:
+            - lib/core/models/*.dart
+      riverpod_generator:
+        enabled: false

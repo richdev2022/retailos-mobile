@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_client.dart';
+import 'dart:async' show Timer;
 
 /// Generic paginated list screen with search + pull-to-refresh.
 /// Used as a base for products, sales, customers, suppliers, expenses.
@@ -190,5 +191,3 @@ class _ErrorView extends StatelessWidget {
   }
 }
 
-// dart:async import shim
-import 'dart:async' show Timer;

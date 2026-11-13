@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/network/api_client.dart';
 import '../../../core/widgets/paginated_list_screen.dart';
 
 class SalesHistoryScreen extends PaginatedListScreen<Map<String, dynamic>> {
