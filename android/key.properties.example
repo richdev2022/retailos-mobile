@@ -1,0 +1,21 @@
+# Keystore config for local Android signing.
+# Copy this file to `key.properties` (sibling of this example) and fill in
+# values matching your keystore. NEVER commit the real key.properties file.
+#
+# To generate a keystore:
+#   keytool -genkey -v -keystore retailos.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 \
+#     -alias retailos
+#
+# Place the retailos.jks file at: android/app/retailos.jks
+# Then fill in the values below.
+#
+# For CI/CD via GitHub Actions, see .github/workflows/build-mobile.yml —
+# the workflow reads keystore + passwords from repo secrets
+# (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
+#  ANDROID_KEY_PASSWORD) and writes its own key.properties at build time.
+
+storeFile=retailos.jks
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyAlias=retailos
+keyPassword=YOUR_KEY_PASSWORD

@@ -1,0 +1,67 @@
+# RetailOS mobile — Flutter .gitignore
+
+# ---- Flutter / Dart ----
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+.fvm/
+coverage/
+coverage_badge.svg
+
+# ---- Generated code ----
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+lib/generated/
+
+# ---- IDE / editor ----
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+*.swp
+*.swo
+*~
+
+# ---- Android signing & secrets ----
+android/key.properties
+android/app/retailos.jks
+android/app/upload-keystore.jks
+android/app/debug.keystore
+*.keystore
+*.jks
+
+# ---- Secrets / env ----
+.env
+.env.*
+!.env.example
+
+# ---- Fastlane / Codemagic / CI locals ----
+# (Fastlane Match service creds etc.)
+*.p8
+GoogleService-Info.plist
+google-services.json
+
+# ---- iOS ----
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/Generated.xcconfig
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# ---- General ----
+*.log

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Allow sharing generated PDF receipts from app cache/files. -->
+    <cache-path name="cache_receipts" path="receipts/" />
+    <files-path name="files_receipts" path="receipts/" />
+    <external-files-path name="ext_receipts" path="receipts/" />
+    <external-cache-path name="ext_cache_receipts" path="receipts/" />
+</paths>
