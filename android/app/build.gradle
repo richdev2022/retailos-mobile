@@ -24,12 +24,17 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.retailos.mobile"
-    compileSdk = 34
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 35
+    // Pin NDK to the version required by plugins (mobile_scanner, connectivity_plus,
+    // flutter_local_notifications, sqlite3_flutter_libs, etc.). The Flutter SDK
+    // ships an older NDK by default; pinning to 25.1.8937393 satisfies all plugins.
+    ndkVersion = "25.1.8937393"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Required by flutter_local_notifications and other plugins that use Java 8+ APIs
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -38,12 +43,15 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        // The prod flavor uses the same source set as main
+        prod.java.srcDirs += 'src/main/kotlin'
+        dev.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {
         applicationId = "com.retailos.mobile"
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdkVersion 23
+        targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
@@ -81,8 +89,12 @@ android {
         release {
             // In production, set up signing as documented in README.md
             signingConfig = keystoreProperties['storeFile'] != null ? signingConfigs.release : signingConfigs.debug
-            minifyEnabled true
-            shrinkResources true
+            // Disable R8 minification for now — Flutter's PlayStoreDeferredComponentManager
+            // references com.google.android.play.core.* classes that aren't bundled,
+            // causing R8 to fail even with -dontwarn rules. We can re-enable after
+            // adding the Play Core dependency or migrating to deferred components.
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -94,4 +106,6 @@ flutter {
 
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
+    // Required for core library desugaring (Java 8+ APIs on older Android)
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }

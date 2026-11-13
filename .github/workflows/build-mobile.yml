@@ -84,13 +84,18 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          # Heredoc with no leading whitespace — key.properties must be exact.
+          # storeFile is relative to the android/app module directory.
           cat > android/key.properties <<EOF
           storeFile=retailos.jks
           storePassword=$ANDROID_KEYSTORE_PASSWORD
           keyAlias=$ANDROID_KEY_ALIAS
           keyPassword=$ANDROID_KEY_PASSWORD
           EOF
-          echo "key.properties written."
+          # Strip leading whitespace from each line (the YAML heredoc indents them)
+          sed -i 's/^[[:space:]]*//' android/key.properties
+          echo "key.properties written (values masked):"
+          sed 's/=.*/=***/' android/key.properties
 
       - name: Build release APK
         run: flutter build apk --release --flavor prod -t lib/main.dart --no-tree-shake-icons

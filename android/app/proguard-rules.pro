@@ -8,6 +8,11 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
+# Play Core (referenced by Flutter's PlayStoreDeferredComponentManager).
+# We don't bundle Play Core, so suppress the missing-class errors.
+-dontwarn com.google.android.play.core.**
+-dontwarn com.google.android.play.**
+
 # Drift (SQLite)
 -keep class * extends androidx.sqlite.db.SupportSQLiteOpenHelper { *; }
 -dontwarn androidx.sqlite.**
