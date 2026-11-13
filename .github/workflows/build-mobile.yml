@@ -98,10 +98,23 @@ jobs:
           sed 's/=.*/=***/' android/key.properties
 
       - name: Build release APK
-        run: flutter build apk --release --flavor prod -t lib/main.dart --no-tree-shake-icons
+        env:
+          # Override the backend URL at build time via --dart-define.
+          # Defaults to the production Render deployment.
+          # To use a different backend, set the API_BASE_URL repository variable.
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: |
+          flutter build apk --release --flavor prod -t lib/main.dart --no-tree-shake-icons \
+            --dart-define=API_BASE_URL="${API_BASE_URL:-https://retailos-backend-v3lw.onrender.com/api/v1}" \
+            --dart-define=ENV=prod
 
       - name: Build release AAB (App Bundle for Play Store)
-        run: flutter build appbundle --release --flavor prod -t lib/main.dart --no-tree-shake-icons
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: |
+          flutter build appbundle --release --flavor prod -t lib/main.dart --no-tree-shake-icons \
+            --dart-define=API_BASE_URL="${API_BASE_URL:-https://retailos-backend-v3lw.onrender.com/api/v1}" \
+            --dart-define=ENV=prod
 
       - name: Verify APK signature
         if: ${{ steps.keystore.outputs.keystore-path != '' }}
