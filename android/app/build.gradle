@@ -25,11 +25,16 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.retailos.mobile"
     compileSdk = 35
-    ndkVersion = flutter.ndkVersion
+    // Pin NDK to the version required by plugins (mobile_scanner, connectivity_plus,
+    // flutter_local_notifications, sqlite3_flutter_libs, etc.). The Flutter SDK
+    // ships an older NDK by default; pinning to 25.1.8937393 satisfies all plugins.
+    ndkVersion = "25.1.8937393"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Required by flutter_local_notifications and other plugins that use Java 8+ APIs
+        coreLibraryDesugaringEnabled true
     }
 
     kotlinOptions {
@@ -97,4 +102,6 @@ flutter {
 
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
+    // Required for core library desugaring (Java 8+ APIs on older Android)
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
 }
