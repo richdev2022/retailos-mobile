@@ -3,13 +3,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../constants/env.dart';
 import '../network/api_client.dart';
 import '../storage/local_database.dart';
 import '../storage/secure_storage.dart';
 import '../sync/sync_engine.dart';
 
+/// Resolve the backend base URL. Reads from `Env.apiBaseUrl` (which honors
+/// --dart-define=API_BASE_URL=... at build time). Falls back to the production
+/// Render deployment URL.
 String resolveBaseUrl({required bool isProd}) {
-  return isProd ? 'https://api.retailos.com' : 'http://10.0.2.2:4000';
+  return Env.apiBaseUrl;
 }
 
 // ---------------------------------------------------------------------------

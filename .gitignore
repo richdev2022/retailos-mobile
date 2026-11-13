@@ -68,3 +68,4 @@ ios/Flutter/flutter_assets/
 
 # Keep pubspec.lock for apps (Flutter convention)
 !pubspec.lock
+android/local.properties
