@@ -19,6 +19,9 @@ class AppTextField extends StatelessWidget {
     this.autofocus = false,
     this.hintText,
     this.focusNode,
+    // Backward-compatible aliases
+    this.icon,
+    this.hint,
   });
 
   final String label;
@@ -38,8 +41,14 @@ class AppTextField extends StatelessWidget {
   final String? hintText;
   final FocusNode? focusNode;
 
+  // Aliases used by older screen code
+  final IconData? icon;
+  final String? hint;
+
   @override
   Widget build(BuildContext context) {
+    final resolvedPrefix = prefixIcon ?? (icon != null ? Icon(icon, size: 18) : null);
+    final resolvedHint = hintText ?? hint;
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -55,9 +64,9 @@ class AppTextField extends StatelessWidget {
       focusNode: focusNode,
       decoration: InputDecoration(
         labelText: label,
-        hintText: hintText,
+        hintText: resolvedHint,
         suffixIcon: suffixIcon,
-        prefixIcon: prefixIcon,
+        prefixIcon: resolvedPrefix,
       ),
     );
   }

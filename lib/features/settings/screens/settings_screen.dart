@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:retailos_mobile/core/state/auth_state.dart';
+import 'package:retailos_mobile/core/state/business_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/state/auth_state.dart';
-import '../../../core/state/business_state.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_card.dart';
 
@@ -13,8 +13,8 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authNotifierProvider);
-    final business = ref.watch(businessNotifierProvider);
+    final auth = ref.watch(authProvider);
+    final business = ref.watch(businessProvider);
     final isLight = Theme.of(context).brightness == Brightness.light;
     final user = auth.user;
 
@@ -110,11 +110,11 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             TextButton.icon(
               onPressed: () async {
-                await ref.read(authNotifierProvider.notifier).logout();
+                await ref.read(authProvider.notifier).logout();
                 if (context.mounted) context.go('/welcome');
               },
-              icon: const Icon(Icons.logout_rounded, color: AppTheme.danger),
-              label: const Text(
+              icon: Icon(Icons.logout_rounded, color: AppTheme.danger),
+              label: Text(
                 'Sign out',
                 style: TextStyle(color: AppTheme.danger),
               ),

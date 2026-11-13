@@ -21,7 +21,7 @@ class SubscriptionPlan with _$SubscriptionPlan {
     required BillingInterval interval,
     /// Price (minor units).
     @JsonKey(name: 'price_minor') @Default(0) int priceMinor,
-    String currency,
+    @Default('NGN') String currency,
     @Default(1) int branchLimit,
     @Default(0) int staffLimit,
     @Default(false) bool multiBranch,

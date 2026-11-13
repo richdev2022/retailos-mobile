@@ -32,7 +32,7 @@ class PlaceholderScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
+                child: Icon(
                   Icons.construction_rounded,
                   size: 36,
                   color: AppTheme.primary,

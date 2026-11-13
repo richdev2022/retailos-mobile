@@ -24,7 +24,6 @@ class ProductListScreen extends PaginatedListScreen<Map<String, dynamic>> {
     final priceMinor = item['sellingPriceMinor']?.toString() ?? '0';
     final price = (BigInt.tryParse(priceMinor) ?? BigInt.zero) / BigInt.from(100);
     final stockQty = item['stockQty'] as int? ?? 0;
-    final status = item['status'] as String? ?? 'ACTIVE';
 
     return Card(
       child: ListTile(

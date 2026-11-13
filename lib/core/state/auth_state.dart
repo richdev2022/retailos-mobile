@@ -176,6 +176,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = AuthState.initial();
   }
 
+  /// Alias for [bootstrap] (used by the bootstrap orchestration).
+  Future<void> restoreSession() => bootstrap();
+
+  /// Accept a staff invitation (stub — calls register-like flow when implemented).
+  Future<void> acceptInvitation({required String token, required String password}) async {
+    // TODO: implement invitation acceptance via /auth/invitations/:token
+    state = state.copyWith(error: 'Invitation flow not yet implemented');
+  }
+
   void clearError() => state = state.copyWith(error: null);
 }
 

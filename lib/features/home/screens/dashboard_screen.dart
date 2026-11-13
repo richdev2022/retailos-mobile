@@ -16,8 +16,8 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authNotifierProvider);
-    final business = ref.watch(businessNotifierProvider);
+    final auth = ref.watch(authProvider);
+    final business = ref.watch(businessProvider);
     final currency = business.activeBusiness?.currency ?? 'NGN';
     final user = auth.user;
 
@@ -52,7 +52,7 @@ class DashboardScreen extends ConsumerWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async =>
-              ref.read(businessNotifierProvider.notifier).refreshBusinesses(),
+              ref.read(businessProvider.notifier).refreshBusinesses(),
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             children: [
@@ -74,7 +74,7 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      MoneyUtils.formatMinor(125_350, currency),
+                      MoneyUtils.formatMinor(125350, currency),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 30,
@@ -124,13 +124,13 @@ class DashboardScreen extends ConsumerWidget {
                   StatCard(
                     label: 'Inventory value',
                     value: MoneyUtils.formatMinorCompact(
-                        2_400_000, currency),
+                        2400000, currency),
                     icon: Icons.inventory_2_rounded,
                     iconColor: AppTheme.info,
                   ),
                   StatCard(
                     label: 'Expenses',
-                    value: MoneyUtils.formatMinorCompact(45_200, currency),
+                    value: MoneyUtils.formatMinorCompact(45200, currency),
                     delta: StatDelta.down,
                     deltaLabel: '-4%',
                     icon: Icons.money_off_rounded,
@@ -216,7 +216,7 @@ class _DateRangeChip extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 Formatters.formatDate(DateTime.now()),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppTheme.primary,
@@ -226,7 +226,7 @@ class _DateRangeChip extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        const Icon(Icons.sync_rounded, size: 16, color: AppTheme.success),
+        Icon(Icons.sync_rounded, size: 16, color: AppTheme.success),
         const SizedBox(width: 4),
         Text(
           'Synced',
@@ -298,7 +298,7 @@ class _SaleRow extends StatelessWidget {
               color: AppTheme.primaryLight,
               borderRadius: BorderRadius.circular(AppTheme.radiusSm),
             ),
-            child: const Icon(Icons.receipt_outlined,
+            child: Icon(Icons.receipt_outlined,
                 size: 18, color: AppTheme.primary),
           ),
           const SizedBox(width: 12),
@@ -322,8 +322,8 @@ class _SaleRow extends StatelessWidget {
             ),
           ),
           Text(
-            MoneyUtils.formatMinor(8_500, currency),
-            style: const TextStyle(
+            MoneyUtils.formatMinor(8500, currency),
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               color: AppTheme.primary,
             ),

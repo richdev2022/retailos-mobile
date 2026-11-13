@@ -65,3 +65,6 @@ ios/Flutter/flutter_assets/
 
 # ---- General ----
 *.log
+
+# Keep pubspec.lock for apps (Flutter convention)
+!pubspec.lock

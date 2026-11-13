@@ -110,24 +110,26 @@ class BusinessNotifier extends StateNotifier<BusinessState> {
   Future<void> fetchMemberships() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final response = await _api.get<dynamic>('/businesses');
-      final items = _api.unwrapList<BusinessSummary>(
-        response,
-        (list) => list
-            .map((m) => BusinessSummary.fromJson(m as Map<String, dynamic>))
-            .toList(),
-      );
-      state = state.copyWith(memberships: items);
-      // Auto-pick first business if none set
-      if (state.activeBusinessId == null && items.isNotEmpty) {
-        await setActiveBusiness(items.first.id);
+      final api = _api;
+      final response = await api.listBusinesses({});
+      final List<BusinessSummary> items =
+          response.items.map(BusinessSummary.fromJson).toList();
+      BusinessSummary? active;
+      if (state.activeBusinessId != null) {
+        try {
+          active = items.firstWhere((b) => b.id == state.activeBusinessId);
+        } catch (_) {
+          active = null;
+        }
       }
-    } on ApiError catch (e) {
-      state = state.copyWith(isLoading: false, error: e.message);
+      active ??= items.isNotEmpty ? items.first : null;
+      state = state.copyWith(
+        memberships: items,
+        activeBusinessId: active?.id,
+        isLoading: false,
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
-    } finally {
-      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -146,6 +148,9 @@ class BusinessNotifier extends StateNotifier<BusinessState> {
     await SecureStorage.setActiveBranchId(branchId);
     state = state.copyWith(activeBranchId: branchId);
   }
+
+  /// Alias for [fetchMemberships] (used by the dashboard).
+  Future<void> refreshBusinesses() => fetchMemberships();
 
   void clear() {
     state = BusinessState();

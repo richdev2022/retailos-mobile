@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:retailos_mobile/features/common/placeholder_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,9 +16,7 @@ import '../../features/products/screens/product_list_screen.dart';
 import '../../features/sales/screens/sales_history_screen.dart';
 import '../../features/reports/screens/reports_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
-import '../../features/pos/screens/pos_screen.dart';
-import '../../features/pos/screens/checkout_screen.dart';
-import '../../features/pos/screens/receipt_screen.dart';
+import '../../features/sales/screens/pos_screen.dart';
 import '../../features/common/main_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -116,12 +115,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 routes: <RouteBase>[
                   GoRoute(
                     path: 'checkout',
-                    builder: (BuildContext context, GoRouterState state) => const CheckoutScreen(),
+                    builder: (BuildContext context, GoRouterState state) => const PosScreen(),
                   ),
                   GoRoute(
                     path: 'receipt/:id',
                     builder: (BuildContext context, GoRouterState state) =>
-                        ReceiptScreen(saleId: state.pathParameters['id']!),
+                        PlaceholderScreen(title: 'Receipt ${state.pathParameters['id']!}'),
                   ),
                 ],
               ),

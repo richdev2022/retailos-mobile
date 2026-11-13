@@ -196,4 +196,33 @@ class AppTheme {
   static Color get success => _successLight;
   static Color get warning => _warningLight;
   static Color get info => _infoLight;
+
+  // Exposed palette for direct use in screens
+  static Color get primary => _primaryLight;
+  static Color get primaryLight => _primaryLight;
+  static Color get primaryDark => _primaryDark;
+  static Color get secondary => _secondaryLight;
+  static Color get secondaryLight => _secondaryLight;
+  static Color get secondaryDark => _secondaryDark;
+
+  // Surface colors (for cards, panels)
+  static const Color lightSurface = Color(0xFFF7F8FA);
+  static const Color darkSurface = Color(0xFF0F1419);
+  static const Color lightSurfaceVariant = Color(0xFFF1F3F5);
+  static const Color darkSurfaceVariant = Color(0xFF151B23);
+
+  // Borders
+  static const Color lightBorder = Color(0xFFEAECF0);
+  static const Color darkBorder = Color(0xFF1F2630);
+
+  // Text colors
+  static const Color textPrimaryLight = Color(0xFF1A1F2E);
+  static const Color textPrimaryDark = Color(0xFFE6EAF2);
+  static const Color textSecondaryLight = Color(0xFF64748B);
+  static const Color textSecondaryDark = Color(0xFF94A3B8);
+
+  // Radii
+  static const double radius = 16.0;
+  static const double radiusSm = 8.0;
+  static const double radiusLg = 24.0;
 }

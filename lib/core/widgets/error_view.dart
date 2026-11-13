@@ -35,7 +35,7 @@ class ErrorView extends StatelessWidget {
             width: compact ? 56 : 80,
             height: compact ? 56 : 80,
             decoration: BoxDecoration(
-              color: AppTheme.dangerLight.withOpacity(0.5),
+              color: AppTheme.danger.withOpacity(0.5),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
