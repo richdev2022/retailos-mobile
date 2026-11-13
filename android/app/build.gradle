@@ -24,7 +24,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.retailos.mobile"
-    compileSdk = 34
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -38,12 +38,15 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        // The prod flavor uses the same source set as main
+        prod.java.srcDirs += 'src/main/kotlin'
+        dev.java.srcDirs += 'src/main/kotlin'
     }
 
     defaultConfig {
         applicationId = "com.retailos.mobile"
-        minSdkVersion 21
-        targetSdkVersion 34
+        minSdkVersion 23
+        targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
