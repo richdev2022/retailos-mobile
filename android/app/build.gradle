@@ -89,8 +89,12 @@ android {
         release {
             // In production, set up signing as documented in README.md
             signingConfig = keystoreProperties['storeFile'] != null ? signingConfigs.release : signingConfigs.debug
-            minifyEnabled true
-            shrinkResources true
+            // Disable R8 minification for now — Flutter's PlayStoreDeferredComponentManager
+            // references com.google.android.play.core.* classes that aren't bundled,
+            // causing R8 to fail even with -dontwarn rules. We can re-enable after
+            // adding the Play Core dependency or migrating to deferred components.
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
