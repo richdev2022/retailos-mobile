@@ -13,6 +13,7 @@ import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/accept_invitation_screen.dart';
 import '../../features/onboarding/screens/create_business_screen.dart';
+import '../../features/onboarding/screens/select_business_screen.dart';
 import '../../features/home/screens/dashboard_screen.dart';
 import '../../features/products/screens/product_list_screen.dart';
 import '../../features/inventory/screens/inventory_screen.dart';
@@ -34,13 +35,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
   final bizState = ref.watch(businessProvider);
 
-  // When auth state changes to authenticated, load businesses if not already loaded
-  ref.listen<AuthState>(authProvider, (prev, next) {
-    if (prev?.isAuthenticated != true && next.isAuthenticated && !bizState.hasBusiness) {
-      ref.read(businessProvider.notifier).bootstrap();
-    }
-  });
-
   final isAuthenticated = authState.isAuthenticated;
   final hasActiveBusiness = bizState.hasActiveBusiness;
 
@@ -49,21 +43,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: false,
     refreshListenable: _RouterRefreshNotifier(ref),
     redirect: (BuildContext context, GoRouterState state) {
-      final loggingIn = state.matchedLocation == '/welcome' ||
-          state.matchedLocation.startsWith('/auth/') ||
-          state.matchedLocation == '/onboarding/business';
+      final loc = state.matchedLocation;
+
+      // Splash screen — always allowed
+      if (loc == '/splash') return null;
+
+      // Not authenticated → only allow auth/welcome screens
       if (!isAuthenticated) {
-        return loggingIn ? null : '/welcome';
+        final isAuthRoute = loc == '/welcome' || loc.startsWith('/auth/');
+        return isAuthRoute ? null : '/welcome';
       }
-      // Authenticated but no business yet → onboarding
-      if (!hasActiveBusiness && state.matchedLocation != '/onboarding/business') {
-        return '/onboarding/business';
+
+      // Authenticated — allow access to select-business, onboarding, and app routes
+      // If user has an active business, redirect away from auth/welcome/select screens
+      if (hasActiveBusiness) {
+        final isAuthRoute = loc == '/welcome' || loc.startsWith('/auth/') || loc == '/select-business' || loc == '/onboarding/business';
+        if (isAuthRoute && loc != '/auth/accept-invitation') {
+          return '/home';
+        }
+        return null;
       }
-      // Authenticated + has business + trying to access login/welcome → redirect to home
-      if (isAuthenticated && hasActiveBusiness && loggingIn && state.matchedLocation != '/auth/accept-invitation') {
-        return '/home';
+
+      // Authenticated but NO active business selected
+      // If user has businesses (memberships loaded), go to select-business
+      // If no businesses, go to onboarding
+      if (bizState.hasBusiness) {
+        // User has businesses but hasn't selected one
+        final isSelectOrOnboarding = loc == '/select-business' || loc == '/onboarding/business';
+        return isSelectOrOnboarding ? null : '/select-business';
+      } else {
+        // No businesses at all — go to onboarding
+        // But allow select-business if they're coming from onboarding skip
+        final isOnboarding = loc == '/onboarding/business' || loc == '/select-business';
+        return isOnboarding ? null : '/onboarding/business';
       }
-      return null;
     },
     routes: <RouteBase>[
       GoRoute(
@@ -104,156 +117,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/onboarding/business',
         builder: (BuildContext context, GoRouterState state) => const CreateBusinessScreen(),
       ),
-      // Standalone routes (not in bottom nav) — accessible from settings, dashboard, etc.
       GoRoute(
-        path: '/inventory',
-        builder: (BuildContext context, GoRouterState state) => const InventoryScreen(),
+        path: '/select-business',
+        builder: (BuildContext context, GoRouterState state) => const SelectBusinessScreen(),
       ),
-      GoRoute(
-        path: '/customers',
-        builder: (BuildContext context, GoRouterState state) => const CustomersScreen(),
-      ),
-      GoRoute(
-        path: '/suppliers',
-        builder: (BuildContext context, GoRouterState state) => const SuppliersScreen(),
-      ),
-      GoRoute(
-        path: '/purchases',
-        builder: (BuildContext context, GoRouterState state) => const PurchasesScreen(),
-      ),
-      GoRoute(
-        path: '/expenses',
-        builder: (BuildContext context, GoRouterState state) => const ExpensesScreen(),
-      ),
-      GoRoute(
-        path: '/staff',
-        builder: (BuildContext context, GoRouterState state) => const StaffScreen(),
-      ),
-      GoRoute(
-        path: '/branches',
-        builder: (BuildContext context, GoRouterState state) => const BranchesScreen(),
-      ),
-      GoRoute(
-        path: '/subscription',
-        builder: (BuildContext context, GoRouterState state) => const SubscriptionScreen(),
-      ),
-      // Report sub-routes (each opens a GenericReportScreen with a title + endpoint)
-      GoRoute(
-        path: '/reports/sales',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Sales Report', endpoint: '/reports/sales'),
-      ),
-      GoRoute(
-        path: '/reports/profit-loss',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Profit & Loss', endpoint: '/reports/profit-loss'),
-      ),
-      GoRoute(
-        path: '/reports/inventory',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Inventory Valuation', endpoint: '/reports/inventory'),
-      ),
-      GoRoute(
-        path: '/reports/stock-movement',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Stock Movements', endpoint: '/reports/inventory'),
-      ),
-      GoRoute(
-        path: '/reports/low-stock',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Low Stock', endpoint: '/reports/inventory'),
-      ),
-      GoRoute(
-        path: '/reports/expiry',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Expiry Tracking', endpoint: '/reports/inventory'),
-      ),
-      GoRoute(
-        path: '/reports/product-performance',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Product Performance', endpoint: '/reports/sales'),
-      ),
-      GoRoute(
-        path: '/reports/cashier',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Cashier Report', endpoint: '/reports/sales'),
-      ),
-      GoRoute(
-        path: '/reports/customer-credit',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Customer Credit', endpoint: '/reports/sales'),
-      ),
-      GoRoute(
-        path: '/reports/supplier',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Supplier Report', endpoint: '/reports/sales'),
-      ),
-      GoRoute(
-        path: '/reports/expenses',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Expenses Report', endpoint: '/reports/sales'),
-      ),
-      // Notifications
-      GoRoute(
-        path: '/notifications',
-        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Notifications', endpoint: '/notifications'),
-      ),
-      // Bottom-nav shell routes
+      // Standalone routes
+      GoRoute(path: '/inventory', builder: (c, s) => const InventoryScreen()),
+      GoRoute(path: '/customers', builder: (c, s) => const CustomersScreen()),
+      GoRoute(path: '/suppliers', builder: (c, s) => const SuppliersScreen()),
+      GoRoute(path: '/purchases', builder: (c, s) => const PurchasesScreen()),
+      GoRoute(path: '/expenses', builder: (c, s) => const ExpensesScreen()),
+      GoRoute(path: '/staff', builder: (c, s) => const StaffScreen()),
+      GoRoute(path: '/branches', builder: (c, s) => const BranchesScreen()),
+      GoRoute(path: '/subscription', builder: (c, s) => const SubscriptionScreen()),
+      GoRoute(path: '/reports/sales', builder: (c, s) => const GenericReportScreen(title: 'Sales Report', endpoint: '/reports/sales')),
+      GoRoute(path: '/reports/profit-loss', builder: (c, s) => const GenericReportScreen(title: 'Profit & Loss', endpoint: '/reports/profit-loss')),
+      GoRoute(path: '/reports/inventory', builder: (c, s) => const GenericReportScreen(title: 'Inventory Valuation', endpoint: '/reports/inventory')),
+      GoRoute(path: '/reports/stock-movement', builder: (c, s) => const GenericReportScreen(title: 'Stock Movements', endpoint: '/reports/inventory')),
+      GoRoute(path: '/reports/low-stock', builder: (c, s) => const GenericReportScreen(title: 'Low Stock', endpoint: '/reports/inventory')),
+      GoRoute(path: '/reports/expiry', builder: (c, s) => const GenericReportScreen(title: 'Expiry Tracking', endpoint: '/reports/inventory')),
+      GoRoute(path: '/reports/product-performance', builder: (c, s) => const GenericReportScreen(title: 'Product Performance', endpoint: '/reports/sales')),
+      GoRoute(path: '/reports/cashier', builder: (c, s) => const GenericReportScreen(title: 'Cashier Report', endpoint: '/reports/sales')),
+      GoRoute(path: '/reports/customer-credit', builder: (c, s) => const GenericReportScreen(title: 'Customer Credit', endpoint: '/reports/sales')),
+      GoRoute(path: '/reports/supplier', builder: (c, s) => const GenericReportScreen(title: 'Supplier Report', endpoint: '/reports/sales')),
+      GoRoute(path: '/reports/expenses', builder: (c, s) => const GenericReportScreen(title: 'Expenses Report', endpoint: '/reports/sales')),
+      GoRoute(path: '/notifications', builder: (c, s) => const GenericReportScreen(title: 'Notifications', endpoint: '/notifications')),
+      // Bottom-nav shell
       StatefulShellRoute.indexedStack(
         builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
           return MainShell(navigationShell: navigationShell);
         },
         branches: <StatefulShellBranch>[
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/home',
-                builder: (BuildContext context, GoRouterState state) => const DashboardScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/products',
-                builder: (BuildContext context, GoRouterState state) => const ProductListScreen(),
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: 'new',
-                    builder: (BuildContext context, GoRouterState state) => const ProductListScreen(),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/pos',
-                builder: (BuildContext context, GoRouterState state) => const PosScreen(),
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: 'checkout',
-                    builder: (BuildContext context, GoRouterState state) => const PosScreen(),
-                  ),
-                  GoRoute(
-                    path: 'receipt/:id',
-                    builder: (BuildContext context, GoRouterState state) =>
-                        PlaceholderScreen(title: 'Receipt ${state.pathParameters['id']!}'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/sales',
-                builder: (BuildContext context, GoRouterState state) => const SalesHistoryScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/reports',
-                builder: (BuildContext context, GoRouterState state) => const ReportsScreen(),
-              ),
-              GoRoute(
-                path: '/settings',
-                builder: (BuildContext context, GoRouterState state) => const SettingsScreen(),
-              ),
-            ],
-          ),
+          StatefulShellBranch(routes: [GoRoute(path: '/home', builder: (c, s) => const DashboardScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/products', builder: (c, s) => const ProductListScreen(), routes: [GoRoute(path: 'new', builder: (c, s) => const ProductListScreen())])]),
+          StatefulShellBranch(routes: [GoRoute(path: '/pos', builder: (c, s) => const PosScreen(), routes: [GoRoute(path: 'checkout', builder: (c, s) => const PosScreen()), GoRoute(path: 'receipt/:id', builder: (c, s) => PlaceholderScreen(title: 'Receipt ${s.pathParameters['id']!}'))])]),
+          StatefulShellBranch(routes: [GoRoute(path: '/sales', builder: (c, s) => const SalesHistoryScreen())]),
+          StatefulShellBranch(routes: [GoRoute(path: '/reports', builder: (c, s) => const ReportsScreen()), GoRoute(path: '/settings', builder: (c, s) => const SettingsScreen())]),
         ],
       ),
     ],
@@ -269,10 +168,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               const SizedBox(height: 16),
               Text('Page not found: ${state.matchedLocation}', textAlign: TextAlign.center),
               const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => context.go('/home'),
-                child: const Text('Go home'),
-              ),
+              FilledButton(onPressed: () => context.go('/home'), child: const Text('Go home')),
             ],
           ),
         ),
