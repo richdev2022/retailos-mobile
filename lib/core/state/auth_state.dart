@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/api_client.dart';
+import '../services/biometric_service.dart';
 import '../storage/secure_storage.dart';
 
 /// Auth state — persisted across app restarts via SecureStorage.
@@ -167,6 +168,31 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(user: user);
     } catch (e) {
       debugPrint('refreshMe error: $e');
+    }
+  }
+
+  /// Attempt biometric login: if the user has previously opted in and
+  /// a valid token exists in SecureStorage, authenticate via biometrics
+  /// and restore the session without re-entering password.
+  Future<bool> loginWithBiometric() async {
+    final biometricEnabled = await SecureStorage.getBiometricEnabled();
+    if (!biometricEnabled) return false;
+
+    final token = await SecureStorage.getAccessToken();
+    if (token == null) return false;
+
+    final success = await BiometricService.instance.authenticate(
+      reason: 'Authenticate to open RetailOS',
+    );
+    if (!success) return false;
+
+    state = state.copyWith(accessToken: token);
+    try {
+      await refreshMe();
+      return true;
+    } catch (_) {
+      state = AuthState.initial();
+      return false;
     }
   }
 

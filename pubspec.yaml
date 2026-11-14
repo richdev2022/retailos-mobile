@@ -35,6 +35,9 @@ dependencies:
   # Barcode scanning
   mobile_scanner: ^5.2.3
 
+  # Biometric authentication (fingerprint, face ID, iris)
+  local_auth: ^2.3.0
+
   # Codegen helpers (runtime)
   json_annotation: ^4.9.0
   freezed_annotation: ^2.4.4

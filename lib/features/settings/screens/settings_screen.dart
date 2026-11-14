@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app.dart';
 import '../../../core/state/auth_state.dart';
 import '../../../core/state/business_state.dart';
+import '../../../core/storage/secure_storage.dart';
+import '../../../core/services/biometric_service.dart';
 import '../../../core/widgets/app_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -57,8 +59,9 @@ class SettingsScreen extends ConsumerWidget {
           AppCard(
             child: Column(
               children: <Widget>[
-                ListTile(
-                  leading: Icon(
+                // Dark mode toggle
+                SwitchListTile(
+                  secondary: Icon(
                     themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
                     color: theme.colorScheme.primary,
                   ),
@@ -70,13 +73,36 @@ class SettingsScreen extends ConsumerWidget {
                             ? 'Off'
                             : 'Follow system',
                   ),
-                  trailing: Switch(
-                    value: themeMode == ThemeMode.dark,
-                    onChanged: (v) {
-                      ref.read(themeModeProvider.notifier).state =
-                          v ? ThemeMode.dark : ThemeMode.light;
-                    },
-                  ),
+                  value: themeMode == ThemeMode.dark,
+                  onChanged: (v) {
+                    ref.read(themeModeProvider.notifier).state =
+                        v ? ThemeMode.dark : ThemeMode.light;
+                  },
+                ),
+                // Biometric login toggle
+                FutureBuilder<bool>(
+                  future: BiometricService.instance.isAvailable,
+                  builder: (context, snapshot) {
+                    if (snapshot.data != true) return const SizedBox.shrink();
+                    return FutureBuilder<bool>(
+                      future: SecureStorage.getBiometricEnabled(),
+                      builder: (context, enabledSnapshot) {
+                        final enabled = enabledSnapshot.data ?? false;
+                        return SwitchListTile(
+                          secondary: Icon(Icons.fingerprint, color: theme.colorScheme.primary),
+                          title: const Text('Biometric login'),
+                          subtitle: Text(enabled ? 'Enabled — fingerprint / face ID' : 'Use fingerprint or face ID to login'),
+                          value: enabled,
+                          onChanged: (v) async {
+                            await SecureStorage.setBiometricEnabled(v);
+                            // Force a rebuild by toggling a dummy provider
+                            ref.read(themeModeProvider.notifier).state =
+                                ref.read(themeModeProvider.notifier).state;
+                          },
+                        );
+                      },
+                    );
+                  },
                 ),
               ],
             ),
