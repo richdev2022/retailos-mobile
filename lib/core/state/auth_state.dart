@@ -105,6 +105,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await SecureStorage.setUserId(user.id);
 
       state = AuthState(user: user, accessToken: accessToken);
+      // Trigger business state refresh after successful login.
+      // The caller (router redirect) will then see hasActiveBusiness update.
     } on ApiError catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
       rethrow;
@@ -144,6 +146,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await SecureStorage.setUserId(user.id);
 
       state = AuthState(user: user, accessToken: accessToken);
+      // Trigger business state refresh after successful login.
+      // The caller (router redirect) will then see hasActiveBusiness update.
     } on ApiError catch (e) {
       state = state.copyWith(isLoading: false, error: e.message);
       rethrow;

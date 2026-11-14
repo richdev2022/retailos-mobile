@@ -1,210 +1,228 @@
 import 'package:flutter/material.dart';
-import 'package:retailos_mobile/core/state/auth_state.dart';
-import 'package:retailos_mobile/core/state/business_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../../../app.dart';
+import '../../../core/state/auth_state.dart';
+import '../../../core/state/business_state.dart';
 import '../../../core/widgets/app_card.dart';
 
-/// Settings tab — account, business context, subscription, sign out.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authProvider);
-    final business = ref.watch(businessProvider);
-    final isLight = Theme.of(context).brightness == Brightness.light;
-    final user = auth.user;
+    final theme = Theme.of(context);
+    final authState = ref.watch(authProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final user = authState.user;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          children: [
-            AppCard(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 26,
-                    backgroundColor: AppTheme.primary,
-                    child: Text(
-                      (user?.fullName.isNotEmpty ?? false)
-                          ? user!.fullName[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 18,
-                      ),
-                    ),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: <Widget>[
+          // User profile card
+          AppCard(
+            child: Row(
+              children: <Widget>[
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Text(
+                    (user?.fullName.isNotEmpty == true ? user!.fullName : '?')[0].toUpperCase(),
+                    style: TextStyle(color: theme.colorScheme.onPrimaryContainer, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          user?.fullName ?? 'RetailOS user',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Text(
-                          user?.email ?? '',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isLight
-                                ? AppTheme.textSecondaryDark
-                                : AppTheme.textSecondaryLight,
-                          ),
-                        ),
-                      ],
-                    ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(user?.fullName ?? 'User', style: theme.textTheme.titleMedium),
+                      if (user?.email != null)
+                        Text(user!.email!, style: theme.textTheme.bodySmall),
+                      if (user?.phone != null && user?.email == null)
+                        Text(user!.phone!, style: theme.textTheme.bodySmall),
+                    ],
                   ),
-                  Icon(Icons.chevron_right_rounded,
-                      color: isLight
-                          ? AppTheme.textSecondaryDark
-                          : AppTheme.textSecondaryLight),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            _SectionLabel('Business'),
-            const SizedBox(height: 6),
-            _SettingTile(
-              icon: Icons.storefront_outlined,
-              title: business.activeBusiness?.name ?? 'Switch business',
-              subtitle: business.activeBusiness?.currency ?? '',
-              onTap: () => context.push('/branches'),
+          ),
+          const SizedBox(height: 16),
+
+          // Appearance section
+          _SectionHeader(title: 'Appearance'),
+          AppCard(
+            child: Column(
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(
+                    themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text('Dark mode'),
+                  subtitle: Text(
+                    themeMode == ThemeMode.dark
+                        ? 'On'
+                        : themeMode == ThemeMode.light
+                            ? 'Off'
+                            : 'Follow system',
+                  ),
+                  trailing: Switch(
+                    value: themeMode == ThemeMode.dark,
+                    onChanged: (v) {
+                      ref.read(themeModeProvider.notifier).state =
+                          v ? ThemeMode.dark : ThemeMode.light;
+                    },
+                  ),
+                ),
+              ],
             ),
-            _SettingTile(
-              icon: Icons.people_outline_rounded,
-              title: 'Staff & roles',
-              onTap: () => context.push('/staff'),
+          ),
+          const SizedBox(height: 16),
+
+          // Business section
+          _SectionHeader(title: 'Business'),
+          AppCard(
+            child: Column(
+              children: <Widget>[
+                _SettingsTile(
+                  icon: Icons.inventory_2_outlined,
+                  title: 'Inventory',
+                  onTap: () => context.push('/inventory'),
+                ),
+                _SettingsTile(
+                  icon: Icons.people_outline,
+                  title: 'Customers',
+                  onTap: () => context.push('/customers'),
+                ),
+                _SettingsTile(
+                  icon: Icons.business_outlined,
+                  title: 'Suppliers',
+                  onTap: () => context.push('/suppliers'),
+                ),
+                _SettingsTile(
+                  icon: Icons.shopping_cart_outlined,
+                  title: 'Purchases',
+                  onTap: () => context.push('/purchases'),
+                ),
+                _SettingsTile(
+                  icon: Icons.wallet_outlined,
+                  title: 'Expenses',
+                  onTap: () => context.push('/expenses'),
+                ),
+              ],
             ),
-            _SettingTile(
-              icon: Icons.warehouse_outlined,
-              title: 'Suppliers',
-              onTap: () => context.push('/suppliers'),
+          ),
+          const SizedBox(height: 16),
+
+          // Management section
+          _SectionHeader(title: 'Management'),
+          AppCard(
+            child: Column(
+              children: <Widget>[
+                _SettingsTile(
+                  icon: Icons.people_alt_outlined,
+                  title: 'Staff',
+                  onTap: () => context.push('/staff'),
+                ),
+                _SettingsTile(
+                  icon: Icons.account_tree_outlined,
+                  title: 'Branches',
+                  onTap: () => context.push('/branches'),
+                ),
+                _SettingsTile(
+                  icon: Icons.credit_card,
+                  title: 'Subscription',
+                  onTap: () => context.push('/subscription'),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            _SectionLabel('Account'),
-            const SizedBox(height: 6),
-            _SettingTile(
-              icon: Icons.workspaces_outline,
-              title: 'Subscription',
-              onTap: () => context.push('/subscription'),
+          ),
+          const SizedBox(height: 16),
+
+          // Account section
+          _SectionHeader(title: 'Account'),
+          AppCard(
+            child: Column(
+              children: <Widget>[
+                _SettingsTile(
+                  icon: Icons.lock_outline,
+                  title: 'Change password',
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Change password — available in profile settings')),
+                    );
+                  },
+                ),
+                _SettingsTile(
+                  icon: Icons.logout,
+                  title: 'Sign out',
+                  iconColor: Colors.red,
+                  onTap: () async {
+                    await ref.read(authProvider.notifier).logout();
+                    ref.read(businessProvider.notifier).clear();
+                    if (context.mounted) context.go('/welcome');
+                  },
+                ),
+              ],
             ),
-            _SettingTile(
-              icon: Icons.support_agent_outlined,
-              title: 'Help & support',
-              onTap: () => context.push('/support'),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Text(
+              'RetailOS v1.0.0',
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
             ),
-            _SettingTile(
-              icon: Icons.notifications_none_rounded,
-              title: 'Notifications',
-              onTap: () => context.push('/notifications'),
-            ),
-            const SizedBox(height: 24),
-            TextButton.icon(
-              onPressed: () async {
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) context.go('/welcome');
-              },
-              icon: Icon(Icons.logout_rounded, color: AppTheme.danger),
-              label: Text(
-                'Sign out',
-                style: TextStyle(color: AppTheme.danger),
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-  final String text;
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+  final String title;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Theme.of(context).brightness == Brightness.light
-              ? AppTheme.textSecondaryDark
-              : AppTheme.textSecondaryLight,
-        ),
+        title,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }
 }
 
-class _SettingTile extends StatelessWidget {
-  const _SettingTile({
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
     required this.icon,
     required this.title,
-    this.subtitle,
-    required this.onTap,
+    this.onTap,
+    this.iconColor,
   });
-
   final IconData icon;
   final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: Icon(icon, color: iconColor ?? theme.colorScheme.primary),
+      title: Text(title),
+      trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryLight,
-              borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-            ),
-            child: Icon(icon, size: 18, color: AppTheme.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                if (subtitle != null && subtitle!.isNotEmpty)
-                  Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color:
-                          Theme.of(context).brightness == Brightness.light
-                              ? AppTheme.textSecondaryDark
-                              : AppTheme.textSecondaryLight,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right_rounded,
-              color: Theme.of(context).brightness == Brightness.light
-                  ? AppTheme.textSecondaryDark
-                  : AppTheme.textSecondaryLight),
-        ],
-      ),
     );
   }
 }
