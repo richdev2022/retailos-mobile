@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/state/auth_state.dart';
+import '../../../core/state/business_state.dart';
 import '../../../core/widgets/app_text_field.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -17,6 +18,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _identifierCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -27,30 +29,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _isSubmitting = true);
+
     try {
+      // Call login — this sets isAuthenticated = true in auth state
       await ref.read(authProvider.notifier).login(
             identifier: _identifierCtrl.text.trim(),
             password: _passwordCtrl.text,
           );
+
+      // Login succeeded — now load businesses
+      await ref.read(businessProvider.notifier).bootstrap();
+
+      // Now check: does the user have businesses?
+      if (!mounted) return;
+      final bizState = ref.read(businessProvider);
+      if (bizState.hasBusiness) {
+        // User has businesses — go to business selection screen
+        context.go('/select-business');
+      } else {
+        // No businesses — go to onboarding
+        context.go('/onboarding/business');
+      }
     } catch (e) {
-      // Error shown via state
+      // Stay on the same screen — error is shown via SnackBar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final state = ref.watch(authProvider);
-    ref.listen<AuthState>(authProvider, (prev, next) {
-      if (next.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.error!)),
-        );
-      }
-    });
 
     return Scaffold(
-      appBar: AppBar(leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => context.go('/welcome'))),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _isSubmitting ? null : () => context.go('/welcome'),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -61,16 +84,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: <Widget>[
                 const SizedBox(height: 16),
                 // Logo
-              Container(
-                width: 64, height: 64,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(16),
+                Container(
+                  width: 64, height: 64,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.store, size: 32, color: Colors.white),
                 ),
-                child: const Icon(Icons.store, size: 32, color: Colors.white),
-              ),
-              Text('Welcome back', style: theme.textTheme.displayMedium),
+                Text('Welcome back', style: theme.textTheme.displayMedium),
                 const SizedBox(height: 8),
                 Text(
                   'Log in to manage your store.',
@@ -99,15 +122,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => context.go('/auth/forgot-password'),
+                    onPressed: _isSubmitting ? null : () => context.go('/auth/forgot-password'),
                     child: const Text('Forgot password?'),
                   ),
                 ),
                 const SizedBox(height: 20),
+                // STAYS on this screen while loading. No navigation away.
                 FilledButton(
-                  onPressed: state.isLoading ? null : _submit,
-                  child: state.isLoading
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  onPressed: _isSubmitting ? null : _submit,
+                  child: _isSubmitting
+                      ? const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
+                            SizedBox(width: 12),
+                            Text('Logging in...'),
+                          ],
+                        )
                       : const Text('Log in'),
                 ),
                 const SizedBox(height: 16),
@@ -116,7 +147,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: <Widget>[
                     Text('Don\'t have an account?', style: theme.textTheme.bodyMedium),
                     TextButton(
-                      onPressed: () => context.go('/auth/register'),
+                      onPressed: _isSubmitting ? null : () => context.go('/auth/register'),
                       child: const Text('Register'),
                     ),
                   ],
