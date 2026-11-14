@@ -12,7 +12,7 @@ import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
 import '../../features/auth/screens/accept_invitation_screen.dart';
 import '../../features/onboarding/screens/create_business_screen.dart';
-import '../../features/dashboard/screens/dashboard_screen.dart';
+import '../../features/home/screens/dashboard_screen.dart';
 import '../../features/products/screens/product_list_screen.dart';
 import '../../features/inventory/screens/inventory_screen.dart';
 import '../../features/sales/screens/sales_history_screen.dart';
@@ -22,6 +22,7 @@ import '../../features/suppliers/screens/suppliers_screen.dart';
 import '../../features/purchases/screens/purchases_screen.dart';
 import '../../features/expenses/screens/expenses_screen.dart';
 import '../../features/reports/screens/reports_screen.dart';
+import '../../features/reports/screens/generic_report_screen.dart';
 import '../../features/staff/screens/staff_screen.dart';
 import '../../features/branches/screens/branches_screen.dart';
 import '../../features/settings/screens/settings_screen.dart';
@@ -123,6 +124,56 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/subscription',
         builder: (BuildContext context, GoRouterState state) => const SubscriptionScreen(),
+      ),
+      // Report sub-routes (each opens a GenericReportScreen with a title + endpoint)
+      GoRoute(
+        path: '/reports/sales',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Sales Report', endpoint: '/reports/sales'),
+      ),
+      GoRoute(
+        path: '/reports/profit-loss',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Profit & Loss', endpoint: '/reports/profit-loss'),
+      ),
+      GoRoute(
+        path: '/reports/inventory',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Inventory Valuation', endpoint: '/reports/inventory'),
+      ),
+      GoRoute(
+        path: '/reports/stock-movement',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Stock Movements', endpoint: '/reports/inventory'),
+      ),
+      GoRoute(
+        path: '/reports/low-stock',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Low Stock', endpoint: '/reports/inventory'),
+      ),
+      GoRoute(
+        path: '/reports/expiry',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Expiry Tracking', endpoint: '/reports/inventory'),
+      ),
+      GoRoute(
+        path: '/reports/product-performance',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Product Performance', endpoint: '/reports/sales'),
+      ),
+      GoRoute(
+        path: '/reports/cashier',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Cashier Report', endpoint: '/reports/sales'),
+      ),
+      GoRoute(
+        path: '/reports/customer-credit',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Customer Credit', endpoint: '/reports/sales'),
+      ),
+      GoRoute(
+        path: '/reports/supplier',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Supplier Report', endpoint: '/reports/sales'),
+      ),
+      GoRoute(
+        path: '/reports/expenses',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Expenses Report', endpoint: '/reports/sales'),
+      ),
+      // Notifications
+      GoRoute(
+        path: '/notifications',
+        builder: (BuildContext context, GoRouterState state) => const GenericReportScreen(title: 'Notifications', endpoint: '/notifications'),
       ),
       // Bottom-nav shell routes
       StatefulShellRoute.indexedStack(
