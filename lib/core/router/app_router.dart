@@ -10,13 +10,22 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/reset_password_screen.dart';
+import '../../features/auth/screens/accept_invitation_screen.dart';
 import '../../features/onboarding/screens/create_business_screen.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../features/products/screens/product_list_screen.dart';
+import '../../features/inventory/screens/inventory_screen.dart';
 import '../../features/sales/screens/sales_history_screen.dart';
-import '../../features/reports/screens/reports_screen.dart';
-import '../../features/settings/screens/settings_screen.dart';
 import '../../features/sales/screens/pos_screen.dart';
+import '../../features/customers/screens/customers_screen.dart';
+import '../../features/suppliers/screens/suppliers_screen.dart';
+import '../../features/purchases/screens/purchases_screen.dart';
+import '../../features/expenses/screens/expenses_screen.dart';
+import '../../features/reports/screens/reports_screen.dart';
+import '../../features/staff/screens/staff_screen.dart';
+import '../../features/branches/screens/branches_screen.dart';
+import '../../features/settings/screens/settings_screen.dart';
+import '../../features/subscription/screens/subscription_screen.dart';
 import '../../features/common/main_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -37,9 +46,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (!isAuthenticated) {
         return loggingIn ? null : '/welcome';
       }
+      // Authenticated but no business yet → onboarding
       if (!hasActiveBusiness && state.matchedLocation != '/onboarding/business') {
         return '/onboarding/business';
       }
+      // Authenticated + has business + trying to access login/welcome → redirect to home
       if (isAuthenticated && hasActiveBusiness && loggingIn && state.matchedLocation != '/auth/accept-invitation') {
         return '/home';
       }
@@ -73,13 +84,47 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/auth/accept-invitation',
         builder: (BuildContext context, GoRouterState state) {
           final token = state.uri.queryParameters['token'] ?? '';
-          return ResetPasswordScreen(token: token); // placeholder, accept-invitation screen omitted for brevity
+          return AcceptInvitationScreen(token: token);
         },
       ),
       GoRoute(
         path: '/onboarding/business',
         builder: (BuildContext context, GoRouterState state) => const CreateBusinessScreen(),
       ),
+      // Standalone routes (not in bottom nav) — accessible from settings, dashboard, etc.
+      GoRoute(
+        path: '/inventory',
+        builder: (BuildContext context, GoRouterState state) => const InventoryScreen(),
+      ),
+      GoRoute(
+        path: '/customers',
+        builder: (BuildContext context, GoRouterState state) => const CustomersScreen(),
+      ),
+      GoRoute(
+        path: '/suppliers',
+        builder: (BuildContext context, GoRouterState state) => const SuppliersScreen(),
+      ),
+      GoRoute(
+        path: '/purchases',
+        builder: (BuildContext context, GoRouterState state) => const PurchasesScreen(),
+      ),
+      GoRoute(
+        path: '/expenses',
+        builder: (BuildContext context, GoRouterState state) => const ExpensesScreen(),
+      ),
+      GoRoute(
+        path: '/staff',
+        builder: (BuildContext context, GoRouterState state) => const StaffScreen(),
+      ),
+      GoRoute(
+        path: '/branches',
+        builder: (BuildContext context, GoRouterState state) => const BranchesScreen(),
+      ),
+      GoRoute(
+        path: '/subscription',
+        builder: (BuildContext context, GoRouterState state) => const SubscriptionScreen(),
+      ),
+      // Bottom-nav shell routes
       StatefulShellRoute.indexedStack(
         builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
           return MainShell(navigationShell: navigationShell);
@@ -150,8 +195,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
     errorBuilder: (BuildContext context, GoRouterState state) => Scaffold(
+      appBar: AppBar(title: const Text('Page not found')),
       body: Center(
-        child: Text('Page not found: ${state.matchedLocation}'),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text('Page not found: ${state.matchedLocation}', textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () => context.go('/home'),
+                child: const Text('Go home'),
+              ),
+            ],
+          ),
+        ),
       ),
     ),
   );
