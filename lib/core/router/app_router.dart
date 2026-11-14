@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../state/auth_state.dart';
 import '../state/business_state.dart';
+import '../../features/splash/splash_screen.dart';
 import '../../features/auth/screens/welcome_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
@@ -33,11 +34,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
   final bizState = ref.watch(businessProvider);
 
+  // When auth state changes to authenticated, load businesses if not already loaded
+  ref.listen<AuthState>(authProvider, (prev, next) {
+    if (prev?.isAuthenticated != true && next.isAuthenticated && !bizState.hasBusiness) {
+      ref.read(businessProvider.notifier).bootstrap();
+    }
+  });
+
   final isAuthenticated = authState.isAuthenticated;
   final hasActiveBusiness = bizState.hasActiveBusiness;
 
   return GoRouter(
-    initialLocation: '/welcome',
+    initialLocation: '/splash',
     debugLogDiagnostics: false,
     refreshListenable: _RouterRefreshNotifier(ref),
     redirect: (BuildContext context, GoRouterState state) {
@@ -58,6 +66,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: <RouteBase>[
+      GoRoute(
+        path: '/splash',
+        builder: (BuildContext context, GoRouterState state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/welcome',
         builder: (BuildContext context, GoRouterState state) => const WelcomeScreen(),

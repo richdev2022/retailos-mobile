@@ -60,7 +60,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 const SizedBox(height: 16),
-                Text('Welcome back', style: theme.textTheme.displayMedium),
+                // Logo
+              Container(
+                width: 64, height: 64,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(Icons.store, size: 32, color: Colors.white),
+              ),
+              Text('Welcome back', style: theme.textTheme.displayMedium),
                 const SizedBox(height: 8),
                 Text(
                   'Log in to manage your store.',
