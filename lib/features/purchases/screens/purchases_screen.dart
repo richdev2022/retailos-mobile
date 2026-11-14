@@ -17,7 +17,7 @@ class PurchasesScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('New purchase — coming soon')),
+            const SnackBar(content: Text('Select a supplier to create a purchase order')),
           );
         },
         child: const Icon(Icons.add_shopping_cart),

@@ -22,6 +22,7 @@ class SecureStorage {
   static const _kThemeMode = 'theme_mode';
   static const _kLocale = 'locale';
   static const _kLastSyncCursor = 'last_sync_cursor';
+  static const _kBiometricEnabled = 'biometric_enabled';
 
   static Future<String?> getAccessToken() => _storage.read(key: _kAccessToken);
   static Future<void> setAccessToken(String? token) async {
@@ -99,6 +100,16 @@ class SecureStorage {
     } else {
       await _storage.write(key: key, value: value);
     }
+  }
+
+  // Biometric opt-in
+  static Future<bool> getBiometricEnabled() async {
+    final v = await _storage.read(key: _kBiometricEnabled);
+    return v == 'true';
+  }
+
+  static Future<void> setBiometricEnabled(bool enabled) async {
+    await _storage.write(key: _kBiometricEnabled, value: enabled.toString());
   }
 
   /// Clear all auth-related keys (on logout).
